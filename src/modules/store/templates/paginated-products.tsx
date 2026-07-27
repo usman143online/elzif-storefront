@@ -1,10 +1,7 @@
 import { listProductsWithSort } from "@lib/data/products"
 import { getRegion } from "@lib/data/regions"
-import ProductPreview from "@modules/products/components/product-preview"
-import { Pagination } from "@modules/store/components/pagination"
+import InfiniteProductGrid from "@modules/store/components/infinite-product-grid"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
-
-const PRODUCT_LIMIT = 12
 
 type PaginatedProductsParams = {
   limit: number
@@ -16,21 +13,20 @@ type PaginatedProductsParams = {
 
 export default async function PaginatedProducts({
   sortBy,
-  page,
   collectionId,
   categoryId,
   productsIds,
   countryCode,
 }: {
   sortBy?: SortOptions
-  page: number
+  page?: number
   collectionId?: string
   categoryId?: string
   productsIds?: string[]
   countryCode: string
 }) {
   const queryParams: PaginatedProductsParams = {
-    limit: 12,
+    limit: 500,
   }
 
   if (collectionId) {
@@ -55,38 +51,14 @@ export default async function PaginatedProducts({
     return null
   }
 
-  let {
-    response: { products, count },
+  const {
+    response: { products },
   } = await listProductsWithSort({
-    page,
+    page: 1,
     queryParams,
     sortBy,
     countryCode,
   })
 
-  const totalPages = Math.ceil(count / PRODUCT_LIMIT)
-
-  return (
-    <>
-      <ul
-        className="grid grid-cols-2 w-full small:grid-cols-3 medium:grid-cols-4 gap-x-6 gap-y-8"
-        data-testid="products-list"
-      >
-        {products.map((p) => {
-          return (
-            <li key={p.id}>
-              <ProductPreview product={p} region={region} />
-            </li>
-          )
-        })}
-      </ul>
-      {totalPages > 1 && (
-        <Pagination
-          data-testid="product-pagination"
-          page={page}
-          totalPages={totalPages}
-        />
-      )}
-    </>
-  )
+  return <InfiniteProductGrid products={products} region={region} />
 }

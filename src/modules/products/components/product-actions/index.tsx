@@ -3,8 +3,6 @@
 import { addToCart } from "@lib/data/cart"
 import { useIntersection } from "@lib/hooks/use-in-view"
 import { HttpTypes } from "@medusajs/types"
-import { Button } from "@medusajs/ui"
-import Divider from "@modules/common/components/divider"
 import OptionSelect from "@modules/products/components/product-actions/option-select"
 import { isEqual } from "lodash"
 import { usePathname, useSearchParams } from "next/navigation"
@@ -37,7 +35,9 @@ export default function ProductActions({
   const searchParams = useSearchParams()
 
   const [options, setOptions] = useState<Record<string, string | undefined>>({})
+  const [quantity, setQuantity] = useState(1)
   const [isAdding, setIsAdding] = useState(false)
+  const [isBuyingNow, setIsBuyingNow] = useState(false)
   const countryCode = "pk"
 
   // If there is only 1 variant, preselect the options
@@ -116,9 +116,19 @@ export default function ProductActions({
     return false
   }, [selectedVariant])
 
+  const maxQuantity = Math.min(
+    selectedVariant?.manage_inventory
+      ? selectedVariant?.inventory_quantity || 1
+      : 99,
+    99
+  )
+
   const actionsRef = useRef<HTMLDivElement>(null)
 
   const inView = useIntersection(actionsRef, "0px")
+
+  const canPurchase =
+    inStock && !!selectedVariant && !disabled && !isAdding && isValidVariant
 
   // add the selected variant to the cart
   const handleAddToCart = async () => {
@@ -128,60 +138,103 @@ export default function ProductActions({
 
     await addToCart({
       variantId: selectedVariant.id,
-      quantity: 1,
+      quantity,
       countryCode,
     })
 
     setIsAdding(false)
   }
 
+  const handleBuyNow = async () => {
+    if (!selectedVariant?.id) return null
+
+    setIsBuyingNow(true)
+
+    await addToCart({
+      variantId: selectedVariant.id,
+      quantity,
+      countryCode,
+    })
+
+    router.push("/checkout")
+  }
+
   return (
     <>
-      <div className="flex flex-col gap-y-2" ref={actionsRef}>
-        <div>
-          {(product.variants?.length ?? 0) > 1 && (
-            <div className="flex flex-col gap-y-4">
-              {(product.options || []).map((option) => {
-                return (
-                  <div key={option.id}>
-                    <OptionSelect
-                      option={option}
-                      current={options[option.id]}
-                      updateOption={setOptionValue}
-                      title={option.title ?? ""}
-                      data-testid="product-options"
-                      disabled={!!disabled || isAdding}
-                    />
-                  </div>
-                )
-              })}
-              <Divider />
-            </div>
-          )}
-        </div>
-
+      <div className="flex flex-col gap-y-5" ref={actionsRef}>
         <ProductPrice product={product} variant={selectedVariant} />
 
-        <Button
-          onClick={handleAddToCart}
-          disabled={
-            !inStock ||
-            !selectedVariant ||
-            !!disabled ||
-            isAdding ||
-            !isValidVariant
-          }
-          variant="primary"
-          className="w-full h-10"
-          isLoading={isAdding}
-          data-testid="add-product-button"
-        >
-          {!selectedVariant && !options
-            ? "Select variant"
-            : !inStock || !isValidVariant
-            ? "Out of stock"
-            : "Add to cart"}
-        </Button>
+        {(product.variants?.length ?? 0) > 1 && (
+          <div className="flex flex-col gap-y-5">
+            {(product.options || []).map((option) => {
+              return (
+                <div key={option.id}>
+                  <OptionSelect
+                    option={option}
+                    current={options[option.id]}
+                    updateOption={setOptionValue}
+                    title={option.title ?? ""}
+                    data-testid="product-options"
+                    disabled={!!disabled || isAdding}
+                  />
+                </div>
+              )
+            })}
+          </div>
+        )}
+
+        <div className="flex flex-col gap-y-2">
+          <span className="text-xs font-semibold uppercase tracking-widest text-mute">
+            Quantity
+          </span>
+          <div className="flex items-center border border-line w-fit">
+            <button
+              type="button"
+              onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+              className="w-9 h-9 flex items-center justify-center text-ink hover:bg-sand transition-colors"
+              aria-label="Decrease quantity"
+            >
+              −
+            </button>
+            <span className="w-10 text-center text-sm text-ink" data-testid="product-quantity">
+              {quantity}
+            </span>
+            <button
+              type="button"
+              onClick={() => setQuantity((q) => Math.min(maxQuantity, q + 1))}
+              className="w-9 h-9 flex items-center justify-center text-ink hover:bg-sand transition-colors"
+              aria-label="Increase quantity"
+            >
+              +
+            </button>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-y-3">
+          <button
+            onClick={handleAddToCart}
+            disabled={!canPurchase || isBuyingNow}
+            className="w-full h-12 border border-ink text-ink text-sm font-medium uppercase tracking-widest hover:bg-sand transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            data-testid="add-product-button"
+          >
+            {isAdding
+              ? "Adding..."
+              : !selectedVariant
+              ? "Select an option"
+              : !inStock || !isValidVariant
+              ? "Out of stock"
+              : "Add to cart"}
+          </button>
+          <button
+            onClick={handleBuyNow}
+            disabled={!canPurchase || isAdding}
+            className="w-full h-12 bg-ink text-paper text-sm font-medium uppercase tracking-widest hover:bg-ink/85 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            data-testid="buy-now-button"
+          >
+            {isBuyingNow ? "Redirecting..." : "Buy it now"}
+          </button>
+        </div>
+
         <MobileActions
           product={product}
           variant={selectedVariant}

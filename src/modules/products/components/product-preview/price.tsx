@@ -1,5 +1,6 @@
 import { Text, clx } from "@medusajs/ui"
 import { VariantPrice } from "types/global"
+import { formatPKR } from "@lib/util/format-pkr"
 
 export default async function PreviewPrice({ price }: { price: VariantPrice }) {
   if (!price) {
@@ -13,7 +14,7 @@ export default async function PreviewPrice({ price }: { price: VariantPrice }) {
           className="line-through text-mute"
           data-testid="original-price"
         >
-          {price.original_price}
+          {formatPKR(price.original_price_number)}
         </Text>
       )}
       <Text
@@ -22,7 +23,7 @@ export default async function PreviewPrice({ price }: { price: VariantPrice }) {
         })}
         data-testid="price"
       >
-        {price.calculated_price}
+        {formatPKR(price.calculated_price_number)}
       </Text>
     </>
   )
