@@ -29,15 +29,18 @@ export default async function ProductPreview({
   })
 
   return (
-    <LocalizedClientLink href={`/products/${product.handle}`} className="group">
-      <div data-testid="product-wrapper">
+    <LocalizedClientLink
+      href={`/products/${product.handle}`}
+      className="group block w-full"
+    >
+      <div data-testid="product-wrapper" className="w-full">
         <Thumbnail
           thumbnail={product.thumbnail}
           images={product.images}
           size="full"
           isFeatured={isFeatured}
         />
-        <div className="flex flex-col gap-y-1 mt-3" data-testid="product-wrapper-info">
+        <div className="flex flex-col gap-y-1 mt-3 pointer-events-none" data-testid="product-wrapper-info">
           <Text
             className="text-sm text-ink line-clamp-2"
             data-testid="product-title"
