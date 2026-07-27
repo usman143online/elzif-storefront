@@ -6,9 +6,11 @@ import { getLocale } from "@lib/data/locale-actions"
 import { listCategories } from "@lib/data/categories"
 import { listCollections } from "@lib/data/collections"
 import { StoreRegion } from "@medusajs/types"
+import { User, ShoppingBag } from "@medusajs/icons"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import CartButton from "@modules/layout/components/cart-button"
 import SideMenu from "@modules/layout/components/side-menu"
+import SearchButton from "@modules/layout/components/search-button"
 
 export default async function Nav() {
   const [regions, locales, currentLocale, productCategories, { collections }] =
@@ -73,21 +75,24 @@ export default async function Nav() {
             </div>
 
             <div className="flex items-center gap-x-5 h-full flex-1 basis-0 justify-end">
+              <SearchButton />
               <LocalizedClientLink
-                className="hidden small:block text-xs font-medium uppercase tracking-widest text-ink/80 hover:text-ink transition-colors"
+                className="hidden small:flex items-center text-ink hover:text-mute transition-colors"
                 href="/account"
                 data-testid="nav-account-link"
+                aria-label="Account"
               >
-                Account
+                <User />
               </LocalizedClientLink>
               <Suspense
                 fallback={
                   <LocalizedClientLink
-                    className="flex gap-2 text-xs font-medium uppercase tracking-widest text-ink/80 hover:text-ink"
+                    className="flex items-center text-ink hover:text-mute"
                     href="/cart"
                     data-testid="nav-cart-link"
+                    aria-label="Cart"
                   >
-                    Cart (0)
+                    <ShoppingBag />
                   </LocalizedClientLink>
                 }
               >
