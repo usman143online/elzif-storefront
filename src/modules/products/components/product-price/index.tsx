@@ -23,7 +23,16 @@ export default function ProductPrice({
   }
 
   return (
-    <div className="flex items-center gap-x-3 text-ink">
+    <div className="flex items-center flex-wrap gap-x-3 gap-y-1 text-ink">
+      {selectedPrice.price_type === "sale" && (
+        <span
+          className="line-through text-mute text-sm"
+          data-testid="original-product-price"
+          data-value={selectedPrice.original_price_number}
+        >
+          {formatPKR(selectedPrice.original_price_number)}
+        </span>
+      )}
       <span
         className={clx("text-xl font-semibold", {
           "text-red-600": selectedPrice.price_type === "sale",
@@ -37,12 +46,8 @@ export default function ProductPrice({
         </span>
       </span>
       {selectedPrice.price_type === "sale" && (
-        <span
-          className="line-through text-mute text-sm"
-          data-testid="original-product-price"
-          data-value={selectedPrice.original_price_number}
-        >
-          {formatPKR(selectedPrice.original_price_number)}
+        <span className="bg-red-600 text-white text-xs font-medium uppercase tracking-wide px-2 py-1">
+          Sale
         </span>
       )}
     </div>

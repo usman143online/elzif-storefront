@@ -52,6 +52,19 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
           >
             <ProductActionsWrapper id={product.id} region={region} />
           </Suspense>
+          {product.description && (
+            <div className="flex flex-col gap-y-2">
+              <span className="text-xs font-semibold uppercase tracking-widest text-mute">
+                Description
+              </span>
+              <p
+                className="text-sm text-mute whitespace-pre-line leading-relaxed"
+                data-testid="product-description"
+              >
+                {product.description}
+              </p>
+            </div>
+          )}
           <ProductTabs product={product} />
         </div>
       </div>
