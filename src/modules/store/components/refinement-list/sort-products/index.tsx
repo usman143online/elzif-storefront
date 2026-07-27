@@ -1,7 +1,5 @@
 "use client"
 
-import FilterRadioGroup from "@modules/common/components/filter-radio-group"
-
 export type SortOptions = "price_asc" | "price_desc" | "created_at"
 
 type SortProductsProps = {
@@ -11,18 +9,9 @@ type SortProductsProps = {
 }
 
 const sortOptions = [
-  {
-    value: "created_at",
-    label: "Latest Arrivals",
-  },
-  {
-    value: "price_asc",
-    label: "Price: Low -> High",
-  },
-  {
-    value: "price_desc",
-    label: "Price: High -> Low",
-  },
+  { value: "created_at", label: "Latest arrivals" },
+  { value: "price_asc", label: "Price: low to high" },
+  { value: "price_desc", label: "Price: high to low" },
 ]
 
 const SortProducts = ({
@@ -30,18 +19,25 @@ const SortProducts = ({
   sortBy,
   setQueryParams,
 }: SortProductsProps) => {
-  const handleChange = (value: SortOptions) => {
-    setQueryParams("sortBy", value)
-  }
-
   return (
-    <FilterRadioGroup
-      title="Sort by"
-      items={sortOptions}
-      value={sortBy}
-      handleChange={handleChange}
-      data-testid={dataTestId}
-    />
+    <div className="flex items-center gap-x-2">
+      <label htmlFor="sort-by" className="text-xs text-mute uppercase tracking-widest hidden small:inline">
+        Sort by
+      </label>
+      <select
+        id="sort-by"
+        data-testid={dataTestId}
+        value={sortBy}
+        onChange={(e) => setQueryParams("sortBy", e.target.value as SortOptions)}
+        className="border border-line bg-paper text-sm text-ink px-3 py-2 focus:outline-none focus:border-ink cursor-pointer"
+      >
+        {sortOptions.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+    </div>
   )
 }
 
