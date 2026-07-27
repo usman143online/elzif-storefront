@@ -34,13 +34,18 @@ module.exports = {
           80: "#1F2937",
           90: "#111827",
         },
+        ink: "#1A1A1A",
+        paper: "#FFFFFF",
+        sand: "#F6F5F3",
+        line: "#E5E3DE",
+        mute: "#767671",
       },
       borderRadius: {
         none: "0px",
-        soft: "2px",
-        base: "4px",
-        rounded: "8px",
-        large: "16px",
+        soft: "0px",
+        base: "0px",
+        rounded: "0px",
+        large: "0px",
         circle: "9999px",
       },
       maxWidth: {
@@ -60,7 +65,7 @@ module.exports = {
       },
       fontFamily: {
         sans: [
-          "Inter",
+          "var(--font-assistant)",
           "-apple-system",
           "BlinkMacSystemFont",
           "Segoe UI",
