@@ -46,28 +46,29 @@ export async function generateStaticParams() {
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
   const params = await props.params
+  const canonical = `/collections/${params.slug.join("/")}`
 
   if (params.slug.length === 1) {
     const collection = await getCollectionByHandle(params.slug[0])
     if (collection) {
       return {
-        title: `${collection.title} | Medusa Store`,
-        description: `${collection.title} collection`,
+        title: collection.title,
+        description: `Shop the ${collection.title} collection at Elzif.`,
+        alternates: { canonical },
       }
     }
   }
 
   try {
     const productCategory = await getCategoryByHandle(params.slug)
-    const title = productCategory.name + " | Medusa Store"
-    const description = productCategory.description ?? `${title} category.`
+    const description =
+      productCategory.description ||
+      `Shop ${productCategory.name} at Elzif.`
 
     return {
-      title: `${title} | Medusa Store`,
+      title: productCategory.name,
       description,
-      alternates: {
-        canonical: `/collections/${params.slug.join("/")}`,
-      },
+      alternates: { canonical },
     }
   } catch (error) {
     notFound()

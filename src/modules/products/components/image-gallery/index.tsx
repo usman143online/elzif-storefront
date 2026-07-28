@@ -7,9 +7,10 @@ import { useState } from "react"
 
 type ImageGalleryProps = {
   images: HttpTypes.StoreProductImage[]
+  productTitle?: string
 }
 
-const ImageGallery = ({ images }: ImageGalleryProps) => {
+const ImageGallery = ({ images, productTitle }: ImageGalleryProps) => {
   const [activeIndex, setActiveIndex] = useState(0)
 
   if (!images.length) {
@@ -26,7 +27,7 @@ const ImageGallery = ({ images }: ImageGalleryProps) => {
             src={activeImage.url}
             priority
             className="absolute inset-0 p-6"
-            alt="Product image"
+            alt={productTitle ? `${productTitle} — main image` : "Product image"}
             fill
             sizes="(max-width: 576px) 480px, (max-width: 992px) 600px, 800px"
             style={{ objectFit: "contain" }}
@@ -52,7 +53,11 @@ const ImageGallery = ({ images }: ImageGalleryProps) => {
                 <Image
                   src={image.url}
                   className="absolute inset-0 p-1"
-                  alt={`Thumbnail ${index + 1}`}
+                  alt={
+                    productTitle
+                      ? `${productTitle} — thumbnail ${index + 1}`
+                      : `Thumbnail ${index + 1}`
+                  }
                   fill
                   sizes="120px"
                   style={{ objectFit: "contain" }}

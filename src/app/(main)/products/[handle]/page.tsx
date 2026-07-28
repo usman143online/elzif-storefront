@@ -1,7 +1,9 @@
 import { Metadata } from "next"
 import { notFound } from "next/navigation"
 import { listProducts } from "@lib/data/products"
-import { getRegion, listRegions } from "@lib/data/regions"
+import { getRegion } from "@lib/data/regions"
+import { getProductPrice } from "@lib/util/get-product-price"
+import { getBaseURL } from "@lib/util/env"
 import ProductTemplate from "@modules/products/templates"
 import { HttpTypes } from "@medusajs/types"
 
@@ -14,7 +16,7 @@ export async function generateStaticParams() {
   try {
     const { response } = await listProducts({
       countryCode: "pk",
-      queryParams: { limit: 100, fields: "handle" },
+      queryParams: { limit: 500, fields: "handle" },
     })
 
     return response.products
@@ -47,6 +49,12 @@ function getImagesForVariant(
   return product.images!.filter((i) => imageIdsMap.has(i.id))
 }
 
+const stripHtmlAndTruncate = (text?: string | null, maxLength = 160) => {
+  if (!text) return undefined
+  const plain = text.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim()
+  return plain.length > maxLength ? `${plain.slice(0, maxLength - 1)}…` : plain
+}
+
 export async function generateMetadata(props: Props): Promise<Metadata> {
   const params = await props.params
   const { handle } = params
@@ -65,12 +73,26 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     notFound()
   }
 
+  const description =
+    stripHtmlAndTruncate(product.description) ||
+    `Shop ${product.title} at Elzif.`
+
   return {
-    title: `${product.title} | Medusa Store`,
-    description: `${product.title}`,
+    title: product.title,
+    description,
+    alternates: {
+      canonical: `/products/${product.handle}`,
+    },
     openGraph: {
-      title: `${product.title} | Medusa Store`,
-      description: `${product.title}`,
+      title: product.title,
+      description,
+      images: product.thumbnail ? [product.thumbnail] : [],
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: product.title,
+      description,
       images: product.thumbnail ? [product.thumbnail] : [],
     },
   }
@@ -98,12 +120,41 @@ export default async function ProductPage(props: Props) {
     notFound()
   }
 
+  const { cheapestPrice } = getProductPrice({ product: pricedProduct })
+  const baseUrl = getBaseURL()
+
+  const productJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: pricedProduct.title,
+    description: stripHtmlAndTruncate(pricedProduct.description, 500),
+    image: pricedProduct.images?.map((i) => i.url) || [],
+    sku: pricedProduct.variants?.[0]?.sku || undefined,
+    brand: {
+      "@type": "Brand",
+      name: "Elzif",
+    },
+    offers: {
+      "@type": "Offer",
+      url: `${baseUrl}/products/${pricedProduct.handle}`,
+      priceCurrency: cheapestPrice?.currency_code?.toUpperCase() || "PKR",
+      price: cheapestPrice?.calculated_price_number ?? undefined,
+      availability: "https://schema.org/InStock",
+    },
+  }
+
   return (
-    <ProductTemplate
-      product={pricedProduct}
-      region={region}
-      countryCode="pk"
-      images={images}
-    />
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }}
+      />
+      <ProductTemplate
+        product={pricedProduct}
+        region={region}
+        countryCode="pk"
+        images={images}
+      />
+    </>
   )
 }

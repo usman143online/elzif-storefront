@@ -39,6 +39,7 @@ export default function ProductPreview({
           images={product.images}
           size="full"
           isFeatured={isFeatured}
+          alt={product.title}
         />
         <div className="flex flex-col gap-y-1 mt-3 pointer-events-none" data-testid="product-wrapper-info">
           <Text

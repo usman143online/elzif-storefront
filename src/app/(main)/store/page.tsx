@@ -4,8 +4,12 @@ import { SortOptions } from "@modules/store/components/refinement-list/sort-prod
 import StoreTemplate from "@modules/store/templates"
 
 export const metadata: Metadata = {
-  title: "Store",
-  description: "Explore all of our products.",
+  title: "All Products",
+  description:
+    "Browse the full Elzif catalog of skincare and beauty essentials — cleansers, serums, and everyday routine products.",
+  alternates: {
+    canonical: "/store",
+  },
 }
 
 type Params = {
