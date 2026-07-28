@@ -1,5 +1,6 @@
 import { listProductsWithSort } from "@lib/data/products"
 import { getRegion } from "@lib/data/regions"
+import { applyManualSort } from "@lib/util/manual-sort"
 import InfiniteProductGrid from "@modules/store/components/infinite-product-grid"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
 
@@ -67,5 +68,8 @@ export default async function PaginatedProducts({
     countryCode,
   })
 
-  return <InfiniteProductGrid products={products} region={region} />
+  const sortedProducts =
+    !sortBy || sortBy === "created_at" ? applyManualSort(products) : products
+
+  return <InfiniteProductGrid products={sortedProducts} region={region} />
 }

@@ -1,4 +1,5 @@
 import { listProducts } from "@lib/data/products"
+import { applyManualSort } from "@lib/util/manual-sort"
 import { HttpTypes } from "@medusajs/types"
 
 import InfiniteProductGrid from "@modules/store/components/infinite-product-grid"
@@ -15,13 +16,15 @@ export default async function NewArrivals({
     queryParams: {
       limit: 500,
       order: "-created_at",
-      fields: "*variants.calculated_price",
+      fields: "*variants.calculated_price,+metadata",
     },
   })
 
   if (!products?.length) {
     return null
   }
+
+  const sortedProducts = applyManualSort(products)
 
   return (
     <div className="content-container py-12 small:py-20">
@@ -31,7 +34,7 @@ export default async function NewArrivals({
         </span>
         <h2 className="text-2xl font-semibold text-ink mt-1">New arrivals</h2>
       </div>
-      <InfiniteProductGrid products={products} region={region} />
+      <InfiniteProductGrid products={sortedProducts} region={region} />
     </div>
   )
 }
